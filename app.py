@@ -1,10 +1,19 @@
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 
 @app.route('/telegram')
 def telegram_redirect():
-    return '''
+    user_agent = request.headers.get('User-Agent', '').lower()
+    
+    if 'android' in user_agent:
+        store_link = "https://play.google.com/store/apps/details?id=org.telegram.messenger"
+    elif 'iphone' in user_agent or 'ipad' in user_agent:
+        store_link = "https://apps.apple.com/app/telegram-messenger/id686449807"
+    else:
+        store_link = "https://telegram.org/dl"
+    
+    return f'''
     <!DOCTYPE html>
     <html>
     <head>
@@ -13,34 +22,37 @@ def telegram_redirect():
         <title>Abrir Telegram</title>
         <script>
           window.location.href = "tg://resolve?domain=Jptactical_bot";
-          setTimeout(function() {
-            window.location.href = "https://t.me/Jptactical_bot";
-          }, 1500);
+          setTimeout(function() {{
+            window.location.href = "{store_link}";
+          }}, 1500);
         </script>
         <style>
-            body {
+            body {{
                 font-family: -apple-system, sans-serif;
                 background: #1a1a2e;
                 color: white;
                 text-align: center;
                 padding: 40px 20px;
                 margin: 0;
-            }
-            p { color: #aaa; }
-            .manual {
-                margin-top: 30px;
-                font-size: 14px;
-                color: #888;
-            }
-            .manual b { color: #2AABEE; }
+            }}
+            p {{ color: #aaa; }}
+            .btn {{
+                display: block;
+                background: #2AABEE;
+                color: white;
+                text-decoration: none;
+                padding: 16px;
+                border-radius: 12px;
+                margin: 20px auto;
+                max-width: 320px;
+                font-weight: bold;
+            }}
         </style>
     </head>
     <body>
         <p>Abriendo Telegram...</p>
-        <div class="manual">
-            ¿No abrió? Abre tu app de Telegram y busca:<br>
-            <b>@Jptactical_bot</b>
-        </div>
+        <p style="font-size:14px;">Si no tienes la app instalada, se abrirá la tienda automáticamente.</p>
+        <a class="btn" href="{store_link}">Descargar Telegram</a>
     </body>
     </html>
     '''
